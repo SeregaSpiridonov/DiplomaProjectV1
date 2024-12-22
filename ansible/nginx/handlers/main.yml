@@ -1,0 +1,8 @@
+---
+# handlers file for nginx
+- name: Nginx Reloader
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+    enabled: yes
+  listen: "Nginx Reloader"

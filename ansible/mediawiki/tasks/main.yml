@@ -1,0 +1,29 @@
+---
+# tasks file for mediawiki
+
+- name: Скачивание архива с сайта mediawiki
+  ansible.builtin.get_url:
+    url: https://releases.wikimedia.org/mediawiki/1.42/{{ app_ver }}.tar.gz
+    dest: ~/mediawiki.tar.gz
+
+- name: Распаковка архива с приложением mediawiki
+  ansible.builtin.unarchive:
+    src: ~/mediawiki.tar.gz
+    dest: /var/www
+    owner: www-data
+    group: www-data
+    mode: '0600'
+    remote_src: true
+
+- name: Удаление архива
+  ansible.builtin.file:
+    state: absent
+    path: ~/mediawiki.tar.gz
+
+- name: Настройка mediawiki
+  ansible.builtin.template:
+    src: LocalSettings.php.j2
+    dest: /var/www/{{ app_ver }}/LocalSettings.php
+    owner: www-data
+    group: www-data
+    mode: '0600'

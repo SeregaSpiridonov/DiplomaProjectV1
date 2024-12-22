@@ -1,0 +1,6 @@
+---
+# vars file for postgresqlm
+packages_to_install:
+  - acl
+  - pip
+  - libpq-dev

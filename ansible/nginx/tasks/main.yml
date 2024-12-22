@@ -1,0 +1,33 @@
+---
+# tasks file for nginx
+
+- name: Установка необходимых пакетов #Имя задачи
+  apt: #Используемый модуль
+    name: "{{ item }}" #Имя пакета из цикла
+    state: present #Параметр действия. present - установить, absent - удалить
+  loop:
+    - "{{ packages_for_app }}" #Цикл будет перебирать все значения из переменной "packages"
+
+- name: Установка Nginx
+  apt:
+    name: "nginx"
+    state: present
+
+- name: Удаление ссылки на стандартную конфигурацию
+  ansible.builtin.file:
+    state: absent
+    path: /etc/nginx/sites-enabled/default
+
+- name: Настройка Nginx
+  ansible.builtin.template:
+    src: "{{ url_adr }}"
+    dest: /etc/nginx/sites-available/{{ url_adr }}
+
+- name: Создание симлинка на конфигурацию
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/{{ url_adr }}
+    dest: /etc/nginx/sites-enabled/{{ url_adr }}
+    owner: root
+    group: root
+    state: link
+  notify: "Nginx Reloader"

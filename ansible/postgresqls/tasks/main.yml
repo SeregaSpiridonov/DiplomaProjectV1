@@ -1,0 +1,53 @@
+---
+# tasks file for postgresqls
+
+- name: Установка необходимых пакетов
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop:
+    - "{{ packages_to_install }}" #Цикл будет перебирать все значения из переменной "packages"
+
+- name: Установка необходимого модуля python psycopg2
+  ansible.builtin.pip:
+    name: psycopg2
+
+- name: Установка Postgresql(Slave)
+  apt:
+    name: "postgresql"
+    state: present
+    update_cache: true
+
+- name: Ожидание инициализации Postgresql
+  ansible.builtin.wait_for:
+    path: /etc/postgresql/14/main/pg_hba.conf # ожидает создания файла
+
+- name: Настройка 1 Postgresql
+  ansible.builtin.template:
+    src: pg_hba.conf
+    dest: /etc/postgresql/14/main/pg_hba.conf
+
+- name: Настройка 2 Postgresql
+  ansible.builtin.template:
+    src: postgresql.conf
+    dest: /etc/postgresql/14/main/postgresql.conf
+  notify: "Postgres stop"
+
+- name: Подготовка к копированию баз с основного сервера
+  ansible.builtin.file:
+    path: /var/lib/postgresql/14/main/
+    state: absent
+
+- name: Копирование файла pgpass
+  ansible.builtin.copy:
+    src: pasfile/.pgpass
+    dest: /var/lib/postgresql/.pgpass
+    owner: postgres
+    group: postgres
+    mode: '0600'
+
+- name: Копирование БД из main сервера
+  ansible.builtin.command: pg_basebackup -h {{ ip_vm4 }} -D /var/lib/postgresql/14/main -U syncuser -w -v -R
+  become_user: postgres
+  notify: "Postgres start"

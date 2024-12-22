@@ -1,0 +1,10 @@
+- name: Config sshd service and copy private key to bastion host  # имя/описание плейбука
+  hosts: vm1
+  gather_facts: false  # не собирать факты (ускоряет выполнение)
+  become: true  # выполнять с повышением привилегий (sudo)
+  tasks:
+    - name: Copy user ssh private key
+      copy:
+        src: ~/.ssh/id_ed25519  # путь к файлу на локальной машине
+        dest: ~/.ssh/id_ed25519  # путь к директории на удалённом сервере, слэш обязателен
+        mode: 0600  # права доступа к файлу

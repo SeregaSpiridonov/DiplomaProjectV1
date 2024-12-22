@@ -1,0 +1,13 @@
+---
+# vars file for zabbix
+packages_to_install:
+  - nginx
+  - zabbix-server-pgsql
+  - zabbix-frontend-php
+  - php8.1-pgsql
+  - zabbix-nginx-conf
+  - zabbix-sql-scripts
+  - zabbix-agent
+  - acl
+  - pip
+  - libpq-dev

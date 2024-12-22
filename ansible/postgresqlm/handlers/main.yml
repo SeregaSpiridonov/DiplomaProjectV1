@@ -1,0 +1,9 @@
+---
+# handlers file for postgresqlm
+
+- name: Postgresql Restarted
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+    enabled: yes
+  listen: "Postgres restart"

@@ -1,0 +1,9 @@
+---
+# handlers file for default_packages
+
+- name: Zabbix-agent restarter
+  ansible.builtin.service:
+    name: zabbix-agent
+    state: restarted
+    enabled: yes
+  listen: "Zabbix-agent restart"

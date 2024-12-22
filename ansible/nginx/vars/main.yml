@@ -1,0 +1,12 @@
+---
+# vars file for nginx
+packages_for_app:
+  - php
+  - php-intl
+  - php-mbstring
+  - php-xml
+  - php-apcu
+  - php-curl
+  - php-fpm
+  - php-pgsql
+  - php-gd

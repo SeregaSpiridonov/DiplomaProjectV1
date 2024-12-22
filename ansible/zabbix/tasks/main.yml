@@ -1,0 +1,85 @@
+---
+# tasks file for zabbix
+
+- name: Скачивание пакета добавления репозитория
+  ansible.builtin.get_url:
+    url: https://repo.zabbix.com/zabbix/7.2/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+    dest: /tmp/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+
+- name: Установка zabbix-release_latest_7.2+ubuntu22.04_all.deb
+  ansible.builtin.apt:
+    deb: /tmp/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+
+- name: Удаление установочного пакета
+  ansible.builtin.file:
+    state: absent
+    path: /tmp/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+
+- name: Установка Zabbixe Server #Имя задачи
+  apt: #Используемый модуль
+    name: "{{ item }}" #Имя пакета из цикла
+    state: present #Параметр действия. present - установить, absent - удалить
+    update_cache: true # аналог apt update
+  loop:
+    - "{{ packages_to_install }}" #Цикл будет перебирать все значения из переменной "packages"
+
+- name: Установка необходимого модуля python psycopg2
+  ansible.builtin.pip:
+    name: psycopg2
+
+- name: Установка Postgresql
+  apt:
+    name: "postgresql"
+    state: present
+    update_cache: true
+
+- name: Ожидание инициализации Postgresql
+  ansible.builtin.wait_for:
+    path: /etc/postgresql/14/main/pg_hba.conf # ожидает создания файла
+
+- name: Create a user for Zabbix
+  community.postgresql.postgresql_user:
+    name: zabbix # имя пользователя(роли)
+    password: "qaz54321+=hgfZabbix"
+  become_user: postgres
+
+- name: Create a new database for "Zabbix"
+  community.postgresql.postgresql_db:
+    name: zabbix  # название БД
+    owner: zabbix # пользователь БД
+  become_user: postgres
+
+- name: Копирование файла pgpass
+  ansible.builtin.copy:
+    src: pasfile/.pgpassForZabbix
+    dest: /var/lib/postgresql/.pgpass
+    owner: zabbix
+    group: zabbix
+    mode: '0600'
+
+- name: Импортируем начальную схему и данные
+  ansible.builtin.shell: zcat /usr/share/zabbix/sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
+
+- name: Настройка Zabbix
+  ansible.builtin.template:
+    src: zabbix_server.conf
+    dest: /etc/zabbix/zabbix_server.conf
+
+- name: Настройка Nginx Zabbix
+  ansible.builtin.template:
+    src: nginx.conf
+    dest: /etc/zabbix/nginx.conf
+
+- name: Русификация
+  ansible.builtin.shell: sed -i  "s/# ru_RU.UTF-8 UTF-8/ru_RU.UTF-8 UTF-8/g" /etc/locale.gen && sudo locale-gen
+
+- name: Перезапуск служб
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: true
+  with_items:
+    - zabbix-server
+    - zabbix-agent
+    - nginx
+    - php8.1-fpm

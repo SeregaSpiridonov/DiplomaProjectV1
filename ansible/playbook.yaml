@@ -1,0 +1,49 @@
+--- 
+- name: Установка стандартных пакетов
+  hosts: all
+  roles:
+    - role: default_packages
+  tags:
+    - install_packages
+
+- name: Установка и настройка nginx балансировщика
+  hosts: nginx_balancer # Будет работать на узлах в группе nginx_balancer
+  roles:
+    - role: nginx_balancer
+  tags:
+    - nginx_balancer
+
+- name: Установка nginx для MediaWiki
+  hosts: mediawiki # Будет работать на узлах в группе app_database
+  roles:
+    - role: nginx
+  tags:
+    - nginx
+
+- name: Установка MediaWiki
+  hosts: mediawiki # Будет работать на узлах в группе app_database
+  roles:
+    - role: mediawiki
+  tags:
+    - mediawiki
+
+- name: Установка PostgreSQL master
+  hosts: database_master # Будет работать на узлах в группе app_database
+  roles:
+    - role: postgresqlm
+  tags:
+    - postgresqlm
+
+- name: Установка PostgreSQL slave
+  hosts: database_slave # Будет работать на узлах в группе app_database
+  roles:
+    - role: postgresqls
+  tags:
+    - postgresqls
+
+- name: Установка и настройка Zabbix Server
+  hosts: Zabbix_server # хост vm6
+  roles:
+    - role: zabbix
+  tags:
+    - zabbix

@@ -1,0 +1,37 @@
+---
+# tasks file for nginx_balancer
+
+- name: Установка Nginx
+  apt:
+    name: "nginx"
+    state: present
+
+- name: Delete default link file
+  ansible.builtin.file:
+    state: absent
+    path: /etc/nginx/sites-enabled/default
+
+- name: Настройка Nginx
+  ansible.builtin.template:
+    src: "{{ url_adr }}"
+    dest: /etc/nginx/sites-available/{{ url_adr }}
+
+- name: Создание симлинка конфигурации
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/{{ url_adr }}
+    dest: /etc/nginx/sites-enabled/{{ url_adr }}
+    owner: root
+    group: root
+    state: link
+
+- name: Копирование сертификатов ssl
+  copy:
+    src: "{{ item }}"
+    dest: /etc/nginx # куда
+    remote_src: no
+    mode: 0644 # права
+    owner: root
+    group: root
+  with_fileglob:
+    - ssl/* # откуда (там где запускается ansible)
+  notify: "Nginx Reloader"

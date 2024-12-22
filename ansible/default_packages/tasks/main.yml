@@ -1,0 +1,53 @@
+---
+# tasks file for default_packages
+
+- name: Меняем имя машины
+  shell: "echo {{ inventory_hostname }} > /etc/hostname"
+  when: "inventory_hostname != ansible_hostname"
+
+- name: Применение нового имени
+  ansible.builtin.command: hostname {{ inventory_hostname }}
+  when: "inventory_hostname != ansible_hostname"
+
+- name: Устанавливаем временную зону Europe/Moscow
+  community.general.timezone:
+    name: Europe/Moscow
+
+- name: Скачивание пакета добавления репозитория
+  ansible.builtin.get_url:
+    url: https://repo.zabbix.com/zabbix/7.2/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+    dest: /tmp/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+  when: inventory_hostname not in hosts_deny
+
+- name: Установка zabbix-release_latest_7.2+ubuntu22.04_all.deb
+  ansible.builtin.apt:
+    deb: /tmp/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+  when: inventory_hostname not in hosts_deny
+
+- name: Удаление установочного пакета
+  ansible.builtin.file:
+    state: absent
+    path: /tmp/zabbix-release_latest_7.2+ubuntu22.04_all.deb
+  when: inventory_hostname not in hosts_deny
+
+- name: Установка программ #Имя задачи
+  apt: #Используемый модуль
+    name: "{{ item }}" #Имя пакета из цикла
+    state: present #Параметр действия. present - установить, absent - удалить
+    update_cache: true
+  loop:
+    - "{{ packages_to_install }}" #Цикл будет перебирать все значения из переменной "packages"
+
+- name: Установка агента Zabbix
+  apt:
+    name: "zabbix-agent"
+    state: present #Параметр действия. present - установить, absent - удалить
+    update_cache: true
+  when: inventory_hostname not in hosts_deny # кроме хоста Zabbix server
+
+- name: Настройка агента Zabbix
+  ansible.builtin.template:
+    src: zabbix_agentd.conf
+    dest: /etc/zabbix/zabbix_agentd.conf
+  notify: "Zabbix-agent restart"
+  when: inventory_hostname not in hosts_deny

@@ -1,0 +1,60 @@
+---
+# tasks file for postgresqlm
+
+- name: Установка необходимых пакетов
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop:
+    - "{{ packages_to_install }}" #Цикл будет перебирать все значения из переменной "packages"
+
+- name: Установка необходимого модуля python psycopg2
+  ansible.builtin.pip:
+    name: psycopg2
+
+- name: Установка Postgresql(Master)
+  apt:
+    name: "postgresql"
+    state: present
+    update_cache: true
+
+- name: Ожидание инициализации Postgresql
+  ansible.builtin.wait_for:
+    path: /etc/postgresql/14/main/pg_hba.conf # ожидает создания файла
+
+- name: Настройка 1 Postgresql
+  ansible.builtin.template:
+    src: pg_hba.conf
+    dest: /etc/postgresql/14/main/pg_hba.conf
+
+- name: Настройка 2 Postgresql
+  ansible.builtin.template:
+    src: postgresql.conf
+    dest: /etc/postgresql/14/main/postgresql.conf
+  notify: "Postgres restart"
+
+- name: Ожидание запуска Postgresql после перезагрузки
+  ansible.builtin.wait_for:
+    host: 0.0.0.0 # любой ip
+    port: 5432    # номер порта
+    delay: 5     # через 10сек
+
+- name: Create a user for wiki
+  community.postgresql.postgresql_user:
+    name: wikiuser # имя пользователя(роли)
+    password: "qaz54321+=hgfwikiuser"
+  become_user: postgres
+
+- name: Create a user for replica
+  community.postgresql.postgresql_user:
+    name: syncuser
+    password: "qaz54321+=hG9syncuser"
+    role_attr_flags: REPLICATION,NOSUPERUSER # флаги при создании пользователя(роли)
+  become_user: postgres
+
+- name: Create a new database for wiki "my_wiki"
+  community.postgresql.postgresql_db:
+    name: my_wiki   # название БД
+    owner: wikiuser # пользователь БД
+  become_user: postgres
