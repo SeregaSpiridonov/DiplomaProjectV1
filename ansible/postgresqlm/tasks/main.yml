@@ -45,6 +45,7 @@
     name: wikiuser # имя пользователя(роли)
     password: "qaz54321+=hgfwikiuser"
   become_user: postgres
+  when: instal_db == "clear"
 
 - name: Create a user for replica
   community.postgresql.postgresql_user:
@@ -52,9 +53,52 @@
     password: "qaz54321+=hG9syncuser"
     role_attr_flags: REPLICATION,NOSUPERUSER # флаги при создании пользователя(роли)
   become_user: postgres
+  when: instal_db == "clear"
 
 - name: Create a new database for wiki "my_wiki"
   community.postgresql.postgresql_db:
     name: my_wiki   # название БД
     owner: wikiuser # пользователь БД
   become_user: postgres
+  when: instal_db == "clear"
+
+- name: Остановка службы Postgresql
+  service:
+    name: "postgresql"
+    state: stopped
+  when: instal_db == "backup"
+
+- name: Копирование резервной копии БД
+  copy:
+    src: backup/base_for_wiki_clear.tar.gz
+    dest: /tmp     # куда
+    remote_src: no # копирование из папки где запускается ansible
+  when: instal_db == "backup"
+
+- name: Подготовка к востановлению БД
+  ansible.builtin.file:
+    path: /var/lib/postgresql/14/main/*
+    state: absent
+  when: instal_db == "backup"
+
+- name: Распаковка БД
+  ansible.builtin.unarchive:
+    src: /tmp/base_for_wiki_clear.tar.gz
+    dest: /var/lib/postgresql/14/main/
+    owner: postgres
+    group: postgres
+    mode: '0600'
+    remote_src: true
+  when: instal_db == "backup"
+
+- name: Удаление архива резервной копии БД
+  ansible.builtin.file:
+    state: absent
+    path: /tmp/base_for_wiki_clear.tar.gz
+  when: instal_db == "backup"
+
+- name: Запуск службы Postgresql
+  service:
+    name: "postgresql"
+    state: started
+  when: instal_db == "backup"

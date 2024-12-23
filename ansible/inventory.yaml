@@ -16,8 +16,8 @@ linux: #Группа хостов
     database_master: #Имя подгруппы хостов
       hosts: #Узлы группы
         vm4: #Имя машины
-          ansible_host: 192.168.10.14 #Адрес машины
-          ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q ubuntu@158.160.34.47"' #подключение через vm1
+          ansible_host: localhost #192.168.10.14 #Адрес машины
+#          ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q ubuntu@158.160.34.47"' #подключение через vm1
     database_slave: #Имя подгруппы хостов
       hosts: #Узлы группы
         vm5: #Имя машины
@@ -29,7 +29,7 @@ linux: #Группа хостов
           ansible_host: 192.168.10.16 #Адрес машины
           ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q ubuntu@158.160.34.47"' #подключение через vm1
   vars: #Переменные, доступные или используемые для всех подгрупп
-    ansible_user: "ubuntu"
+    ansible_user: s10309758 #"ubuntu"
     ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
     connection_protocol: ssh #тип подключения
     ansible_become: true
@@ -40,5 +40,6 @@ linux: #Группа хостов
     ip_vm5: 192.168.10.15
     ip_vm6: 192.168.10.16
     hosts_deny: [vm6]
+    instal_db: backup # clear or backup (for db mediawiki)
     url_adr: example-practicum.ru
     app_ver: mediawiki-1.42.3
