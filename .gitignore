@@ -19,4 +19,4 @@ terraform_1.9.2_linux_amd64.zip
 .terraformrc
 .wget-hsts
 .zshrc
-base_for_wiki_clear.tar.gz
+/base_for_wiki_clear.tar.gz
