@@ -1,2 +1,9 @@
 ---
 # handlers file for mediawiki
+
+- name: lsyncd Restarter
+  ansible.builtin.service:
+    name: lsyncd
+    state: restarted
+    enabled: yes
+  listen: "lsyncd Restart"

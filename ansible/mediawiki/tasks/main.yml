@@ -28,3 +28,35 @@
     group: www-data
     mode: '0600'
   when: instal_db == "backup"
+
+- name: Добавляем публичный ключ для работы lsyncd
+  ansible.builtin.lineinfile:
+    path: /root/.ssh/authorized_keys # в какой файл
+    line: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGiAxH3e8A8Amqk8c5trxJ2xKoWjMnu0YAF+jarhzbHj root@vm
+    create: yes # создаст если нет
+
+- name: Копирование приватного ключа ssh
+  copy:
+    src: key/id_ed25519_lsyncd
+    dest: /root/.ssh # куда
+    remote_src: no
+    mode: '0600' # права
+    owner: root
+    group: root
+
+- name: Установка lsyncd #синхронизация файлов между серверами
+  apt:
+    name: "lsyncd"
+    state: present
+    update_cache: true
+
+- name: Создаём директорию для файла настроек lsyncd
+  ansible.windows.win_file:
+    path: /etc/lsyncd
+    state: directory
+
+- name: Настройка lsyncd
+  ansible.builtin.template:
+    src: lsyncd.conf.lua
+    dest: /etc/lsyncd/lsyncd.conf.lua
+  notify: "lsyncd Restart"
