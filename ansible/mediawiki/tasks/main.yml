@@ -51,7 +51,7 @@
     update_cache: true
 
 - name: Создаём директорию для файла настроек lsyncd
-  ansible.windows.win_file:
+  ansible.builtin.file:
     path: /etc/lsyncd
     state: directory
 

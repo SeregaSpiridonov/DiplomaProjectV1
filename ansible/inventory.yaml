@@ -39,6 +39,7 @@ linux: #Группа хостов
     ip_vm4: 192.168.10.14
     ip_vm5: 192.168.10.15
     ip_vm6: 192.168.10.16
+    lsyncd_ip:  "{{ '192.168.10.13' if inventory_hostname == 'vm2' else '192.168.10.12' }}"
     hosts_deny: [vm6]
     instal_db: backup # clear or backup (for db mediawiki)
     url_adr: example-practicum.ru

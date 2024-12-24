@@ -85,9 +85,9 @@
   ansible.builtin.unarchive:
     src: /tmp/base_for_wiki_clear.tar.gz
     dest: /var/lib/postgresql/14/main/
-    owner: postgres
-    group: postgres
-    mode: '0600'
+#    owner: postgres
+#    group: postgres
+#    mode: '0600'
     remote_src: true
   when: instal_db == "backup"
 
