@@ -55,10 +55,10 @@
   become_user: postgres
   when: instal_db == "clear"
 
-- name: Create a new database for wiki "my_wiki"
+- name: Create a new database for wiki {{ name_db_mediawiki }}
   community.postgresql.postgresql_db:
-    name: my_wiki   # название БД
-    owner: wikiuser # пользователь БД
+    name: "{{ name_db_mediawiki }}"   # название БД
+    owner: wikiuser                   # пользователь БД
   become_user: postgres
   when: instal_db == "clear"
 
@@ -85,9 +85,6 @@
   ansible.builtin.unarchive:
     src: /tmp/base_for_wiki_clear.tar.gz
     dest: /var/lib/postgresql/14/main/
-#    owner: postgres
-#    group: postgres
-#    mode: '0600'
     remote_src: true
   when: instal_db == "backup"
 
@@ -102,3 +99,38 @@
     name: "postgresql"
     state: started
   when: instal_db == "backup"
+
+- name: Копирование скрипта дампа БД
+  ansible.builtin.template:
+    src: dumpdb_mediawiki.sh.j2
+    dest: /var/lib/postgresql/dumpdb_mediawiki.sh
+    owner: postgres
+    group: postgres
+    mode: '0700'
+
+- name: Копирование скрипта востановления БД
+  ansible.builtin.template:
+    src: restoredb_mediawiki.sh.j2
+    dest: /var/lib/postgresql/restoredb_mediawiki.sh
+    owner: postgres
+    group: "{{ sudo_user_name }}"
+    mode: '0770'
+
+- name: Создаём директорию для дампов БД
+  ansible.builtin.file:
+    path: /var/backups/db-backup
+    state: directory
+    owner: postgres
+    group: "{{ sudo_user_name }}"
+    mode: '0760'
+
+- name: Создание задания cron (дамп бд) # каждый день в 04-00
+  ansible.builtin.cron:
+    name: backup_db_mediawiki
+    minute: "0"
+    hour: "4"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    user: postgres
+    job: "/var/lib/postgresql/dumpdb_mediawiki.sh"

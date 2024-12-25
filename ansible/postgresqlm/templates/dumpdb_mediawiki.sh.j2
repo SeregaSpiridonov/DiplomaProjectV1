@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#PGPASSWORD=password (для использования без файла .pgpas с опцией -U username)
+#export PGPASSWORD
+
+PATHBACKUP=/var/backups/db-backup
+DATABASE={{ name_db_mediawiki }}
+DUMPNAME=$DATABASE.$(date "+%F_%H-%M").dump
+FOLDER=0
+
+#Проверка существует ли директория
+test -d $PATHBACKUP && FOLDER=1
+
+#Делает копию БД
+#Удаляет файлы старше 31 дня
+if [ $FOLDER == 1 ]
+  then
+    echo "Начало копирования БД $database"
+    pg_dump -d $DATABASE -Fc -f $PATHBACKUP/$DUMPNAME && echo "Успешно, создан $DUMPNAME"
+    find $PATHBACKUP -ctime +31 -delete
+  else
+    echo "Ошибка! Директория $PATHBACKUP отсутствует."
+fi
+
+#unset PGPASSWORD

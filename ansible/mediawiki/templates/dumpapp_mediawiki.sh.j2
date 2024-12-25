@@ -1,0 +1,21 @@
+#!/bin/bash
+
+ARCHIVENAME=$(date "+%F_%H-%M").tar
+PATHAPP=/var/www/{{ app_ver }}
+PATHBACKUP=/var/backups/app-backup
+FOLDER=0
+
+#Проверка существует ли директория
+test -d $PATHBACKUP && FOLDER=1
+
+
+#Архивирует директорию с приложением
+#Удаляет файлы старше 31 дня
+if [ $FOLDER == 1 ]
+  then
+    echo "Начало архивирования $PATHAPP"
+    tar -Pczf $PATHBACKUP/$ARCHIVENAME $PATHAPP && echo "Успешно, создан $ARCHIVENAME"
+    find $PATHBACKUP -ctime +31 -delete
+  else
+    echo "Ошибка! Директория $PATHBACKUP отсутствует."
+fi

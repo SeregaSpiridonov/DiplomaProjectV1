@@ -11,8 +11,8 @@
     src: ~/mediawiki.tar.gz
     dest: /var/www
     owner: www-data
-    group: www-data
-    mode: '0600'
+    group: "{{ sudo_user_name }}"
+    mode: '0660'
     remote_src: true
 
 - name: Удаление архива
@@ -60,3 +60,38 @@
     src: lsyncd.conf.lua
     dest: /etc/lsyncd/lsyncd.conf.lua
   notify: "lsyncd Restart"
+
+- name: Копирование скрипта дампа mediawiki
+  ansible.builtin.template:
+    src: dumpapp_mediawiki.sh.j2
+    dest: /home/{{ sudo_user_name }}/dumpapp_mediawiki.sh
+    owner: "{{ sudo_user_name }}"
+    group: "{{ sudo_user_name }}"
+    mode: '0700'
+
+- name: Копирование скрипта востановления БД
+  ansible.builtin.template:
+    src: restoreapp_mediawiki.sh.j2
+    dest: /home/{{ sudo_user_name }}/restoreapp_mediawiki.sh
+    owner: "{{ sudo_user_name }}"
+    group: "{{ sudo_user_name }}"
+    mode: '0700'
+
+- name: Создаём директорию для дампов БД
+  ansible.builtin.file:
+    path: /var/backups/app-backup
+    state: directory
+    owner: "{{ sudo_user_name }}"
+    group: "{{ sudo_user_name }}"
+    mode: '0760'
+
+- name: Создание задания cron (дамп бд) # каждый день в 04-00
+  ansible.builtin.cron:
+    name: backupapp_mediawiki
+    minute: "30"
+    hour: "4"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    user: "{{ sudo_user_name }}"
+    job: "/home/{{ sudo_user_name }}/dumpapp_mediawiki.sh"

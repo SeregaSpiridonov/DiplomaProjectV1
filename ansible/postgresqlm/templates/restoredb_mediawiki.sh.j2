@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ -n "$1" ]
+  then
+    echo "Начало востановления $DATABASE из $NAMEDUMP"
+  else
+    echo "Не передан параметр 'имя файла' испоьзуй $0 namefile.dump"
+    exit 1
+fi
+
+#PGPASSWORD=password (для использования без файла .pgpas)
+#export PGPASSWORD
+NAMEDUMP=$1
+PATHBACKUP=/var/backups/db-backup
+DATABASE={{ name_db_mediawiki }}
+
+sudo -u postgres pg_restore -c --if-exists -d $DATABASE $PATHBACKUP/$NAMEDUMP && echo "БД $DATABASE востановлена."
+
+#unset PGPASSWORD
