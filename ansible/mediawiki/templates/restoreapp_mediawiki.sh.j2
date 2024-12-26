@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ -n "$1" ]
+  then
+    echo "Начало востановления mediawiki из $ARCHIVENAME"
+  else
+    echo "Не передан параметр 'имя файла' используй $0 namefile.tar.gz"
+    exit 1
+fi
+
+ARCHIVENAME=$1
+PATHBACKUP=/var/backups/app-backup
+PATHAPP=/var/www/{{ app_ver }}
+
+sudo tar -xpf $PATHBACKUP/$ARCHIVENAME -C $PATHAPP && echo "Mediawiki успешно востановлен из архива $ARCHIVENAME"

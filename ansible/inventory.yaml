@@ -11,8 +11,8 @@ linux: #Группа хостов
           ansible_host: 192.168.10.12 #Адрес машины
           ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q ubuntu@158.160.34.47"' #подключение через vm1
         vm3: #Имя машины
-          ansible_host: localhost #192.168.10.13 #Адрес машины
-#          ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q ubuntu@158.160.34.47"' #подключение через vm1
+          ansible_host: 192.168.10.13 #Адрес машины
+          ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q ubuntu@158.160.34.47"' #подключение через vm1
     database_master: #Имя подгруппы хостов
       hosts: #Узлы группы
         vm4: #Имя машины
@@ -29,7 +29,7 @@ linux: #Группа хостов
           ansible_host: 192.168.10.16 #Адрес машины
           ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q ubuntu@158.160.34.47"' #подключение через vm1
   vars: #Переменные, доступные или используемые для всех подгрупп
-    sudo_user_name: s10309758  # ubuntu
+    sudo_user_name: ubuntu
     ansible_user: "{{ sudo_user_name }}"
     ansible_ssh_private_key_file: "~/.ssh/id_ed25519"
     connection_protocol: ssh #тип подключения

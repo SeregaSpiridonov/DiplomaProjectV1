@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ARCHIVENAME=$(date "+%F_%H-%M").tar
+ARCHIVENAME=$(date "+%F_%H-%M").tar.gz
 PATHAPP=/var/www/{{ app_ver }}
 PATHBACKUP=/var/backups/app-backup
 FOLDER=0
@@ -14,7 +14,7 @@ test -d $PATHBACKUP && FOLDER=1
 if [ $FOLDER == 1 ]
   then
     echo "Начало архивирования $PATHAPP"
-    tar -Pczf $PATHBACKUP/$ARCHIVENAME $PATHAPP && echo "Успешно, создан $ARCHIVENAME"
+    tar --exclude="LocalSettings.php" -Pczf $PATHBACKUP/$ARCHIVENAME $PATHAPP && echo "Успешно, создан $ARCHIVENAME"
     find $PATHBACKUP -ctime +31 -delete
   else
     echo "Ошибка! Директория $PATHBACKUP отсутствует."

@@ -1,6 +1,12 @@
 ---
 # tasks file for mediawiki
 
+- name: Добавление {{ sudo_user_name }} в группу www-data
+  ansible.builtin.user:
+    name: "{{ sudo_user_name }}"
+    groups: www-data
+    append: true
+
 - name: Скачивание архива с сайта mediawiki
   ansible.builtin.get_url:
     url: https://releases.wikimedia.org/mediawiki/1.42/{{ app_ver }}.tar.gz
@@ -11,7 +17,7 @@
     src: ~/mediawiki.tar.gz
     dest: /var/www
     owner: www-data
-    group: "{{ sudo_user_name }}"
+    group: www-data
     mode: '0660'
     remote_src: true
 
@@ -32,12 +38,12 @@
 - name: Добавляем публичный ключ для работы lsyncd
   ansible.builtin.lineinfile:
     path: /root/.ssh/authorized_keys # в какой файл
-    line: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGiAxH3e8A8Amqk8c5trxJ2xKoWjMnu0YAF+jarhzbHj root@vm
+    line: ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMkxoXpokYG318CkfYy3CbagT0/2m1dyFZEhcN+30RafxHM57BNSgLgBeCBo1ePjrUrixMBSu+OfPprlY3o8O+o= root@vm
     create: yes # создаст если нет
 
 - name: Копирование приватного ключа ssh
   copy:
-    src: key/id_ed25519_lsyncd
+    src: key/id_ed25519
     dest: /root/.ssh # куда
     remote_src: no
     mode: '0600' # права
