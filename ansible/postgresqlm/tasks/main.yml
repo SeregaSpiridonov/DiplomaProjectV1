@@ -28,6 +28,14 @@
     src: pg_hba.conf
     dest: /etc/postgresql/14/main/pg_hba.conf
 
+- name: Копирование файла pgpass
+  ansible.builtin.copy:
+    src: pasfile/.pgpass
+    dest: /var/lib/postgresql/.pgpass
+    owner: postgres # владелец
+    group: postgres # группа
+    mode: '0600'
+
 - name: Настройка 2 Postgresql
   ansible.builtin.template:
     src: postgresql.conf
@@ -134,3 +142,26 @@
     weekday: "*"
     user: postgres
     job: "/var/lib/postgresql/dumpdb_mediawiki.sh"
+
+- name: Создаём директорию .ssh пользователя postgres
+  ansible.builtin.file:
+    path: /var/lib/postgresql/.ssh
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+
+- name: Добавляем публичный ключ для работы failover
+  ansible.builtin.lineinfile:
+    path: /var/lib/postgresql/.ssh/authorized_keys # в какой файл
+    line: ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMkxoXpokYG318CkfYy3CbagT0/2m1dyFZEhcN+30RafxHM57BNSgLgBeCBo1ePjrUrixMBSu+OfPprlY3o8O+o= postgres@vm
+    create: yes # создаст если нет
+
+- name: Копирование приватного ключа ssh
+  copy:
+    src: key/id_ed25519
+    dest: /var/lib/postgresql/.ssh # куда
+    remote_src: no
+    mode: '0600' # права
+    owner: postgres
+    group: postgres

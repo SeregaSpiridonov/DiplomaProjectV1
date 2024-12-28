@@ -1,0 +1,15 @@
+---
+# handlers file for pgpool
+
+- name: Pgpool2 STOP
+  ansible.builtin.service:
+    name: pgpool2
+    state: stopped
+  listen: "Pgpool stop"
+
+- name: Pgpool2 Start
+  ansible.builtin.service:
+    name: pgpool2
+    state: started
+    enabled: yes
+  listen: "Pgpool start"

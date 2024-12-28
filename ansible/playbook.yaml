@@ -6,12 +6,26 @@
   tags:
     - install_packages
 
-- name: Установка и настройка nginx балансировщика
-  hosts: nginx_balancer # Будет работать на узлах в группе nginx_balancer
+- name: Установка PostgreSQL master
+  hosts: database_master # Будет работать на узлах в группе app_database
   roles:
-    - role: nginx_balancer
+    - role: postgresqlm
   tags:
-    - nginx_balancer
+    - postgresqlm
+
+- name: Установка PostgreSQL slave
+  hosts: database_slave # Будет работать на узлах в группе app_database
+  roles:
+    - role: postgresqls
+  tags:
+    - postgresqls
+
+- name: "Установка и настройка сервера балансировки ДБ Pgpool2"
+  hosts: pgpool # Будет работать на узлах в группе pgpool
+  roles:
+    - role: pgpool
+  tags:
+    - pgpool
 
 - name: Установка nginx для MediaWiki
   hosts: mediawiki # Будет работать на узлах в группе app_database
@@ -27,19 +41,12 @@
   tags:
     - mediawiki
 
-- name: Установка PostgreSQL master
-  hosts: database_master # Будет работать на узлах в группе app_database
+- name: "Установка и настройка nginx балансировщика"
+  hosts: nginx_balancer # Будет работать на узлах в группе nginx_balancer
   roles:
-    - role: postgresqlm
+    - role: nginx_balancer
   tags:
-    - postgresqlm
-
-- name: Установка PostgreSQL slave
-  hosts: database_slave # Будет работать на узлах в группе app_database
-  roles:
-    - role: postgresqls
-  tags:
-    - postgresqls
+    - nginx_balancer
 
 - name: Установка и настройка Zabbix Server
   hosts: Zabbix_server # хост vm6
