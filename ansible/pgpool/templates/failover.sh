@@ -16,5 +16,5 @@ fi
 echo "Ведущий сервер вышел из строя"
 echo "Новый ведущий сервер: $NEW_MASTER"
 
-ssh -T postgres@$NEW_MASTER touch $TRIGGER_FILE
+scp failfile postgres@$NEW_MASTER:$TRIGGER_FILE && echo "ok"
 exit 0

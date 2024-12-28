@@ -1,7 +1,7 @@
 upstream {{ url_adr }}{
    ip_hash;
-   server {{ ip_vm2 }}:8080;
-   server {{ ip_vm3 }}:8080;
+   server {{ ip_vm2 }}:8080 max_fails=1 fail_timeout=120s;
+   server {{ ip_vm3 }}:8080 max_fails=1 fail_timeout=120s;
    }
    server {
        listen 80;
@@ -20,6 +20,7 @@ upstream {{ url_adr }}{
         location / {
                 proxy_pass http://{{ url_adr }};
                 proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_connect_timeout  10;
         }
    }
    server {
@@ -35,5 +36,6 @@ upstream {{ url_adr }}{
         location / {
                 proxy_pass http://{{ ip_vm6 }}:9000;
                 proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_connect_timeout  10;
         }
    }

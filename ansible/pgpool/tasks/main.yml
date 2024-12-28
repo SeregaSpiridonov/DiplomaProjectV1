@@ -27,7 +27,22 @@
   ansible.builtin.template:
     src: failover.sh
     dest: /etc/pgpool2/failover.sh
+    owner: postgres
+    group: postgres
     mode: '0700'
+
+- name: Создаём файл failovera для Pgpool2
+  ansible.builtin.template:
+    src: failfile
+    dest: /etc/pgpool2/failfile
+    owner: postgres
+    group: postgres
+    mode: '0644'
+
+- name: Удаление файла pgpool_status
+  ansible.builtin.file:
+    path: /var/log/postgresql/pgpool_status
+    state: absent
 
 - name: Настройка pool_passwd Pgpool2
   ansible.builtin.template:

@@ -58,14 +58,14 @@ $wgEmailAuthentication = true;
 
 ## Database settings
 $wgDBtype = 'postgres';
-$wgDBserver = '192.168.10.14';
+$wgDBserver = '{{ ip_vm7 }}';
 $wgDBname = 'my_wiki';
 $wgDBuser = 'wikiuser';
 $wgDBpassword = 'qaz54321+=hgfwikiuser';
 
 # Postgres specific settings
 $wgDBport = "5432";
-$wgDBssl = true;
+$wgDBssl = false;
 $wgDBmwschema = "mediawiki";
 
 # Shared database table
