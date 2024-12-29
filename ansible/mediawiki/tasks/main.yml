@@ -11,6 +11,7 @@
   ansible.builtin.get_url:
     url: https://releases.wikimedia.org/mediawiki/1.42/{{ app_ver }}.tar.gz
     dest: ~/mediawiki.tar.gz
+  when: instal_db == "clear"
 
 - name: Распаковка архива с приложением mediawiki
   ansible.builtin.unarchive:
@@ -20,11 +21,19 @@
     group: www-data
     mode: '0660'
     remote_src: true
+  when: instal_db == "clear"
 
 - name: Удаление архива
   ansible.builtin.file:
     state: absent
     path: ~/mediawiki.tar.gz
+  when: instal_db == "clear"
+
+- name: Создаём директорию для mediawiki
+  ansible.builtin.file:
+    path: /var/www/{{ app_ver }}
+    state: directory
+  when: instal_db == "backup"
 
 - name: Настройка mediawiki
   ansible.builtin.template:
